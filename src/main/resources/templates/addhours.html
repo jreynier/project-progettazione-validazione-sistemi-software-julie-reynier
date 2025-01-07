@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UniPro : add hours</title>
+</head>
+<body>
+<h1>Add hours to the project : <span th:text="${project.name}" ></span></h1>
+
+<form action="requesthours" method="post">
+    Day:<input type="date" name="day"><br>
+    Hours:<input type="number" min="1" max="10" name="hours"><br>
+    <input type="submit" />
+</form>
+
+<a href="researcher?id=10" th:href="@{researcher(id=${researcher.id})}">Back</a>
+</body>
+</html>

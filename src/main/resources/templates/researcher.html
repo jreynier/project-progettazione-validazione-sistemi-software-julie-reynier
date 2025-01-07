@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>UniPro : Your page</title>
+</head>
+<body>
+<h1>Welcome, <span th:text="${researcher.firstName}+ ' ' + ${researcher.lastName}" ></span></h1>
+
+<h2>Your Projects as PI</h2>
+<ul>
+    <li th:each="project : ${researcher.projectsAsPI}">
+        <span th:text="${project.name}"></span>
+        <a href="project?id=10" th:href="@{project(id=${project.id})}">Manage Project</a>
+    </li>
+</ul>
+
+<h2>Projects You're Working On</h2>
+<ul>
+    <li th:each="project : ${researcher.projects}">
+        <span th:text="${project.name}"></span>
+        <a th:href="@{'/addhours?rid=' + ${researcher.id} + '&pid=' + ${project.id}}">Add hours</a></ul>
+<a href="report?id=10" th:href="@{report(id=${researcher.id})}">Generate report</a>
+
+</body>
+</html>

@@ -1,7 +1,9 @@
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+package it.univr;
+
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Researcher {
@@ -12,6 +14,11 @@ public class Researcher {
     private String firstName;
     private String email;
     private String password;
+    @ManyToMany(mappedBy = "researchers")
+    private List<Project> projects = new ArrayList<>();
+    @OneToMany(mappedBy = "projectInvestigator")
+    private List<Project> projectsAsPI = new ArrayList<>();
+    private List<Hours>
 
     public Researcher(Long id, String lastName, String firstName, String email, String password) {
         this.id = id;
@@ -23,6 +30,9 @@ public class Researcher {
 
     public Researcher() {
 
+    }
+    public Long getId() {
+        return id;
     }
 
     public String getLastName() {
@@ -55,5 +65,18 @@ public class Researcher {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+    public void addProject(Project project) {
+        projects.add(project);
+    }
+    public List<Project> getProjectsAsPI() {
+        return projectsAsPI;
+    }
+    public void addProjectsAsPI(Project projectAsPI) {
+        projectsAsPI.add(projectAsPI);
     }
 }
