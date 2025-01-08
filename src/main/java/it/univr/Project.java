@@ -15,7 +15,8 @@ public class Project {
     private List<Researcher> researchers = new ArrayList<>(); // Researchers working on this project
     @ManyToOne
     private Researcher projectInvestigator;
-
+    @OneToMany(mappedBy = "project")
+    private List<Hours> hours = new ArrayList<>();
 
     public Project() {
 
@@ -57,5 +58,12 @@ public class Project {
         this.projectInvestigator = projectInvestigator;
     }
 
+    public List<Hours> getHours() {
+        return hours;
+    }
+
+    public void addHours(Hours hours) {
+        this.hours.add(hours);
+    }
 
 }

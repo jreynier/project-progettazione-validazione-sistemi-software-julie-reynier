@@ -18,7 +18,8 @@ public class Researcher {
     private List<Project> projects = new ArrayList<>();
     @OneToMany(mappedBy = "projectInvestigator")
     private List<Project> projectsAsPI = new ArrayList<>();
-    private List<Hours>
+    @OneToMany(mappedBy = "researcher")
+    private List<Hours> hours = new ArrayList<>();
 
     public Researcher(Long id, String lastName, String firstName, String email, String password) {
         this.id = id;
@@ -78,5 +79,13 @@ public class Researcher {
     }
     public void addProjectsAsPI(Project projectAsPI) {
         projectsAsPI.add(projectAsPI);
+    }
+
+    public List<Hours> getHours() {
+        return hours;
+    }
+
+    public void addHours(Hours hours) {
+        this.hours.add(hours);
     }
 }
