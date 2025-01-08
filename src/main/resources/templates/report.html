@@ -1,10 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
     <title>UniPro : Your Report</title>
 </head>
 <body>
+<h1>Project Hours For Month : <span  th:text="${month}+ '/' + ${year}"></span></h1>
 
+<table border="1">
+    <thead>
+    <tr>
+        <th>Project</th>
+        <th th:each="day : ${daysInMonth}" th:text="${day}">Day</th>
+        <th> Totale </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${projectHoursMap}">
+        <td th:text="${entry.key.name}">Project Name</td>
+        <td th:each="val : ${entry.value}" th:text="${val}">Hours</td>
+    </tr>
+    <tr>
+        <td>Total</td>
+        <td th:each="day : ${daysInMonth}"
+            th:text="${totalePerDay[day-1]}">0</td>
+        <td th:text="${totalHours}"></td>
+    </tr>
+
+    </tbody>
+</table>
+<a href="researcher?id=10" th:href="@{researcher(id=${researcher.id})}">Back</a>
 </body>
 </html>

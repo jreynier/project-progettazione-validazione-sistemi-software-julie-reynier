@@ -2,11 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>UniPro : Manage Project</title>
 </head>
 <body>
-<h1>Cbon</h1>
+<h1>Manage project : <span th:text="${project.name}" ></span></h1>
 
-j'écris du texte
+<ul>
+<li th:each="entry: ${hoursByResearcher}">
+    <span th:text="${entry.key.firstName}+' '+ ${entry.key.lastName}"> John Smith <br></span>
+    <ul>
+        <li th:each="hour : ${entry.value}">
+            <span th:text="${hour.date}"></span> :
+            <span th:text="${hour.hourWorked}"></span> hours
+            <a href="approve?id=10" th:href="@{approve(id=${hour.id})}">Approve</a>
+            <a href="reject?id=10" th:href="@{reject(id=${hour.id})}">Reject</a>
+            <!-- If no unapproved hours, display a message -->
+        </li>
+        <span th:if="${#lists.isEmpty(entry.value)}">No unapproved hours.</span>
+
+    </ul>
+</li>
+</ul>
+
+<a href="researcher?id=10" th:href="@{researcher(id=${researcher.id})}">Back</a>
+
 </body>
 </html>

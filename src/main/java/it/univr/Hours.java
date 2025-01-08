@@ -2,7 +2,7 @@ package it.univr;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 public class Hours {
@@ -10,7 +10,7 @@ public class Hours {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private int hourWorked;
-    private Date date;
+    private LocalDate date;
     @ManyToOne
     private Researcher researcher;
     @ManyToOne
@@ -38,11 +38,11 @@ public class Hours {
         this.hourWorked = hoursWorked;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

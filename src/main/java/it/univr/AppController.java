@@ -6,9 +6,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDate;
 
-import java.util.Date;
-import java.util.Optional;
+import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class AppController {
@@ -63,14 +65,58 @@ public class AppController {
 
     @RequestMapping("/project")
     public String projectPage(
-            @RequestParam(name="id", required=true) Long id) {
+            @RequestParam(name="id", required=true) Long id,
+            Model model) {
         Optional<Project> result = projectRepository.findById(id);
         if (result.isPresent()){
+            Project project = result.get();
+            List<Researcher> researchers = project.getResearchers();
+            // Map each researcher to their unapproved hours for this project
+            Map<Researcher, List<Hours>> hoursMap = new HashMap<>();
+            for (Researcher researcher : researchers) {
+               List<Hours> hoursList = researcher.getHours().stream()
+                    .filter(h -> h.getProject().equals(project) && !h.isApproved())
+                    .toList();
+               hoursMap.put(researcher, hoursList);
+            }
+            model.addAttribute("project", result.get());
+            model.addAttribute("researcher", result.get().getProjectInvestigator());
+            model.addAttribute("hoursByResearcher", hoursMap);
             return "project";
         }
         else
             return "_error";
     }
+
+    @RequestMapping ("/approve")
+    public String approve(
+            @RequestParam (name="id", required = true) Long id,
+            Model model) {
+        Optional<Hours> result = hourRepository.findById(id);
+        if(result.isPresent()){
+            result.get().setApproved(true);
+            hourRepository.save(result.get());
+            model.addAttribute("project", result.get().getProject());
+            return "redirect:/project?id=" + result.get().getProject().getId();
+        } else {
+            return "_error";
+        }
+    }
+
+    @RequestMapping ("/reject")
+    public String reject(
+            @RequestParam (name="id", required = true) Long id,
+            Model model) {
+        Optional<Hours> result = hourRepository.findById(id);
+        if(result.isPresent()){
+            hourRepository.delete(result.get());
+            return "redirect:/project?id=" + result.get().getProject().getId();
+        } else {
+            return "_error";
+        }
+    }
+
+
 
     @RequestMapping("/addhours")
     public String addHoursPage(
@@ -91,7 +137,7 @@ public class AppController {
     public String requestHours(
             @RequestParam(name="rid", required=true) Long rid,
             @RequestParam(name="pid", required=true) Long pid,
-            @RequestParam(name="day", required=true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
+            @RequestParam(name="day", required=true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(name="hours", required=true) int hours,
             Model model) {
         Hours h = new Hours();
@@ -104,6 +150,61 @@ public class AppController {
         projectRepository.findById(pid).get().addHours(h);
         repository.findById(rid).get().addHours(h);
         return "redirect:/researcher?id="+rid;
+    }
+
+    @RequestMapping("/generate")
+    public String reportPage(
+            @RequestParam(name = "id", required = true) Long id,
+            @RequestParam(name = "month", required = true) int month,
+            @RequestParam(name = "year", required = true) int year,
+            Model model
+    ){
+        model.addAttribute("month",month);
+        model.addAttribute("year",year);
+        Optional<Researcher> result = repository.findById(id);
+        if(result.isPresent()){
+            Researcher researcher = result.get();
+            List<Hours> filteredHours = researcher.getHours().stream()
+                    .filter(hour-> hour.getDate().getMonthValue()==month && hour.getDate().getYear()==year)
+                    .toList();
+            model.addAttribute("researcher",researcher);
+            Map<Project, List<Integer>> projectHoursMap = new HashMap<>();
+            YearMonth yearMonth = YearMonth.of(year, month);
+            int daysInMonth = yearMonth.lengthOfMonth();
+            List<Integer> days = new ArrayList<>();
+            List<Integer> totalePerDay= new ArrayList<>();
+            for (int i = 0; i < daysInMonth; i++) {
+                days.add(i+1);
+                totalePerDay.add(0);
+            }
+            int totalHours = 0;
+            for (Hours hour : filteredHours) {
+                if (!hour.isApproved()){
+                    continue;
+                }
+                LocalDate date = hour.getDate();
+                Project project = hour.getProject();
+                if(!projectHoursMap.containsKey(project)){
+                    List<Integer> listHours = new ArrayList<>();
+                    for (int i = 0; i<daysInMonth+1; i++) {
+                        listHours.add(0);
+                    }
+                    projectHoursMap.put(project, listHours);
+                }
+                projectHoursMap.get(project).set(date.getDayOfMonth()+1,projectHoursMap.get(project).get(date.getDayOfMonth()+1)+hour.getHourWorked());
+                projectHoursMap.get(project).set(daysInMonth,projectHoursMap.get(project).get(daysInMonth)+hour.getHourWorked());
+                totalePerDay.set(date.getDayOfMonth()+1,totalePerDay.get(date.getDayOfMonth()+1)+hour.getHourWorked());
+                totalHours += hour.getHourWorked();
+            }
+
+            model.addAttribute("projectHoursMap", projectHoursMap);
+            model.addAttribute("daysInMonth", days);
+            model.addAttribute("totalePerDay", totalePerDay);
+            model.addAttribute("totalHours", totalHours);
+            return "report";
+
+        }
+        return "_error";
     }
 
 }
