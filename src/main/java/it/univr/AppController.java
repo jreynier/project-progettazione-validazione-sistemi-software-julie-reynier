@@ -1,7 +1,6 @@
 package it.univr;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,13 +9,12 @@ import java.time.LocalDate;
 
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 public class AppController {
 
     @Autowired
-    private ResearcherRepository repository;
+    private ResearcherRepository researcherRepository;
     @Autowired
     private  ProjectRepository projectRepository;
     @Autowired
@@ -31,66 +29,72 @@ public class AppController {
 
     @RequestMapping("/login")
     public String handleLogin(@RequestParam("email") String email,
-                              @RequestParam("password") String password,
-                              Model model) {
+                              @RequestParam("password") String password) {
         // Check if a researcher exists with the given username
-        Researcher researcher = repository.findByEmail(email);
+        Researcher researcher = researcherRepository.findByEmail(email);
 
         if (researcher!= null && researcher.getPassword().equals(password)) {
             // Redirect to the researcher's page
             return "redirect:/researcher?id=" + researcher.getId();
         } else {
-            // Show error message and reload login page
-            model.addAttribute("error", "Invalid username or password.");
+            // reload login page
             return "login";
         }
     }
 
     @RequestMapping("/researcher")
     public String researcherPage(
-            @RequestParam(name="id", required = true) Long id,
+            @RequestParam(name="id") Long id,
             Model model) {
-        Optional<Researcher> researcher = repository.findById(id);
+        Optional<Researcher> researcher = researcherRepository.findById(id);
 
         if (researcher.isPresent()) {
             model.addAttribute("researcher", researcher.get());
             model.addAttribute("projectsAsPI", researcher.get().getProjectsAsPI());
             model.addAttribute("projects", researcher.get().getProjects());
-            return "researcher"; // researcher.html template
+            return "researcher";
         } else {
             model.addAttribute("error", "Researcher not found.");
-            return "_error"; // error.html template
+            return "_error";
         }
     }
 
+    // Manage Project Page
     @RequestMapping("/project")
     public String projectPage(
-            @RequestParam(name="id", required=true) Long id,
+            @RequestParam(name="id") Long id,
             Model model) {
         Optional<Project> result = projectRepository.findById(id);
         if (result.isPresent()){
             Project project = result.get();
-            List<Researcher> researchers = project.getResearchers();
+            List<Researcher> researchers = project.getResearchers(); // researchers that work on this project
+
             // Map each researcher to their unapproved hours for this project
             Map<Researcher, List<Hours>> hoursMap = new HashMap<>();
             for (Researcher researcher : researchers) {
-               List<Hours> hoursList = researcher.getHours().stream()
-                    .filter(h -> h.getProject().equals(project) && !h.isApproved())
-                    .toList();
-               hoursMap.put(researcher, hoursList);
+                List<Hours> hoursList = new ArrayList<>();
+                for (Hours hour : researcher.getHours()){
+                    if (!hour.isApproved() && hour.getProject().getId().equals(id)){
+                        hoursList.add(hour);
+                    }
+                }
+                hoursMap.put(researcher, hoursList);
             }
             model.addAttribute("project", result.get());
             model.addAttribute("researcher", result.get().getProjectInvestigator());
             model.addAttribute("hoursByResearcher", hoursMap);
             return "project";
         }
-        else
+        else{
+            model.addAttribute("error", "Project not found.");
             return "_error";
+        }
     }
 
+    // Set the hour to approve
     @RequestMapping ("/approve")
     public String approve(
-            @RequestParam (name="id", required = true) Long id,
+            @RequestParam (name="id") Long id,
             Model model) {
         Optional<Hours> result = hourRepository.findById(id);
         if(result.isPresent()){
@@ -99,129 +103,170 @@ public class AppController {
             model.addAttribute("project", result.get().getProject());
             return "redirect:/project?id=" + result.get().getProject().getId();
         } else {
+            model.addAttribute("error", "Hour not found.");
             return "_error";
         }
     }
 
+    // Delete the hour from the repository, the hours of the researcher and the hours of the project
     @RequestMapping ("/reject")
     public String reject(
-            @RequestParam (name="id", required = true) Long id,
+            @RequestParam (name="id") Long id,
             Model model) {
         Optional<Hours> result = hourRepository.findById(id);
         if(result.isPresent()){
+            result.get().getResearcher().getHours().remove(result.get());
+            result.get().getProject().getHours().remove(result.get());
             hourRepository.delete(result.get());
             return "redirect:/project?id=" + result.get().getProject().getId();
         } else {
+            model.addAttribute("error", "Hour not found.");
             return "_error";
         }
     }
 
 
 
-    @RequestMapping("/addhours")
+    @RequestMapping("/add-hours")
     public String addHoursPage(
-            @RequestParam(name="rid", required=true) Long rid,
-            @RequestParam(name="pid", required=true) Long pid, Model model) {
-        Optional<Project> result = projectRepository.findById(pid);
-        Optional<Researcher> result2 = repository.findById(rid);
-        if (result.isPresent() && result2.isPresent()) {
-            model.addAttribute("project", result.get());
-            model.addAttribute("researcher", result2.get());
-            return "addhours";
+            @RequestParam(name="rid") Long rid,
+            @RequestParam(name="pid") Long pid, Model model) {
+        Optional<Project> project = projectRepository.findById(pid);
+        Optional<Researcher> researcher = researcherRepository.findById(rid);
+        if (project.isPresent() && researcher.isPresent()) {
+            model.addAttribute("project", project.get());
+            model.addAttribute("researcher", researcher.get());
+            return "add-hours";
         }
-        else
+        else {
+            model.addAttribute("error", "Project or researcher not found.");
             return "_error";
+        }
     }
 
-    @RequestMapping("/requesthours")
+    @RequestMapping("/request-hours")
     public String requestHours(
-            @RequestParam(name="rid", required=true) Long rid,
-            @RequestParam(name="pid", required=true) Long pid,
-            @RequestParam(name="day", required=true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(name="hours", required=true) int hours,
+            @RequestParam(name="rid") Long rid,
+            @RequestParam(name="pid") Long pid,
+            @RequestParam(name="day") LocalDate date,
+            @RequestParam(name="hours") int hours,
             Model model) {
+        Optional<Project> project = projectRepository.findById(pid);
+        Optional<Researcher> researcher = researcherRepository.findById(rid);
+        if (project.isEmpty() || researcher.isEmpty()) {
+            model.addAttribute("error", "Project or researcher not found.");
+            return "_error";
+        }
+        // Create the new hour :
         Hours h = new Hours();
-        h.setHourWorked(hours);
+        h.setHoursWorked(hours);
         h.setDate(date);
         h.setApproved(false);
-        h.setProject(projectRepository.findById(pid).get());
-        h.setResearcher(repository.findById(rid).get());
+        h.setProject(project.get());
+        h.setResearcher(researcher.get());
+        // Save :
         hourRepository.save(h);
-        projectRepository.findById(pid).get().addHours(h);
-        repository.findById(rid).get().addHours(h);
+        project.get().addHours(h);
+        researcher.get().addHours(h);
         return "redirect:/researcher?id="+rid;
     }
 
-    @RequestMapping("/generate")
+    public int getDaysInMonth(int year, int month){
+        YearMonth yearMonth = YearMonth.of(year, month);
+        return yearMonth.lengthOfMonth();
+    }
+
+    @RequestMapping("/generate-report")
     public String reportPage(
-            @RequestParam(name = "id", required = true) Long id,
-            @RequestParam(name = "month", required = true) int month,
-            @RequestParam(name = "year", required = true) int year,
+            @RequestParam(name = "id") Long id,
+            @RequestParam(name = "month") int month,
+            @RequestParam(name = "year") int year,
             Model model
     ){
         model.addAttribute("month",month);
         model.addAttribute("year",year);
-        Optional<Researcher> result = repository.findById(id);
+        Optional<Researcher> result = researcherRepository.findById(id);
         if(result.isPresent()){
             Researcher researcher = result.get();
-            List<Hours> filteredHours = researcher.getHours().stream()
-                    .filter(hour-> hour.getDate().getMonthValue()==month && hour.getDate().getYear()==year)
-                    .toList();
             model.addAttribute("researcher",researcher);
+
+            int daysInMonth = getDaysInMonth(year, month);
+
+            // Create the map of the projects associated to a list of hours worked for each day of the month
             Map<Project, List<Integer>> projectHoursMap = new HashMap<>();
-            YearMonth yearMonth = YearMonth.of(year, month);
-            int daysInMonth = yearMonth.lengthOfMonth();
-            List<Integer> days = new ArrayList<>();
-            List<Integer> totalePerDay= new ArrayList<>();
+
+            List<Integer> days = new ArrayList<>();          // list of the days in the mont (1..31)
+            List<Integer> totalPerDay = new ArrayList<>();   // total of hours worked for each day
             for (int i = 0; i < daysInMonth; i++) {
                 days.add(i+1);
-                totalePerDay.add(0);
+                totalPerDay.add(0);
             }
-            int totalHours = 0;
-            for (Hours hour : filteredHours) {
-                if (!hour.isApproved()){
-                    continue;
-                }
-                LocalDate date = hour.getDate();
-                Project project = hour.getProject();
-                if(!projectHoursMap.containsKey(project)){
-                    List<Integer> listHours = new ArrayList<>();
-                    for (int i = 0; i<daysInMonth+1; i++) {
-                        listHours.add(0);
+            totalPerDay.add(0); // the grand total
+            // Filter the hours of the researcher for the month and year required
+            for (Hours hour : researcher.getHours()){
+                if(hour.getDate().getMonthValue()==month && hour.getDate().getYear()==year){
+                    if (!hour.isApproved() || researcher.isDayOff(hour.getDate())){
+                        continue;
                     }
-                    projectHoursMap.put(project, listHours);
+                    LocalDate date = hour.getDate();
+                    Project project = hour.getProject();
+                    if(!projectHoursMap.containsKey(project)){      // if the project is not in the Map :
+                        List<Integer> listHours = new ArrayList<>(); // we create a new list that will contain th number of hours worked for each day
+                        for (int i = 0; i<=daysInMonth; i++) { // last element will be the total for the month
+                            listHours.add(0);
+                        }
+                        projectHoursMap.put(project, listHours);
+                    }
+                    // Add the hours worked :
+                    projectHoursMap.get(project).set(date.getDayOfMonth()-1,projectHoursMap.get(project).get(date.getDayOfMonth()-1)+hour.getHoursWorked());
+                    projectHoursMap.get(project).set(daysInMonth,projectHoursMap.get(project).get(daysInMonth)+hour.getHoursWorked());  // the total for the project
+                    totalPerDay.set(date.getDayOfMonth()-1, totalPerDay.get(date.getDayOfMonth()-1)+hour.getHoursWorked());             // the total for the day
+                    totalPerDay.set(daysInMonth, totalPerDay.get(daysInMonth)+hour.getHoursWorked());                                   //grand total
+                    for (LocalDate dayOff : researcher.getDaysOff()){
+                        if (dayOff.getYear()==year && dayOff.getMonthValue()==month){
+                            projectHoursMap.get(project).set(date.getDayOfMonth()-1, -1);
+                        }
+                    }
                 }
-                projectHoursMap.get(project).set(date.getDayOfMonth()-1,projectHoursMap.get(project).get(date.getDayOfMonth()-1)+hour.getHourWorked());
-                projectHoursMap.get(project).set(daysInMonth,projectHoursMap.get(project).get(daysInMonth)+hour.getHourWorked());
-                totalePerDay.set(date.getDayOfMonth()-1,totalePerDay.get(date.getDayOfMonth()-1)+hour.getHourWorked());
-                totalHours += hour.getHourWorked();
+            }
+            for (LocalDate dayOff : researcher.getDaysOff()){
+                if (dayOff.getYear()==year && dayOff.getMonthValue()==month){
+                    totalPerDay.set(dayOff.getDayOfMonth()-1, -1);
+                }
             }
 
             model.addAttribute("projectHoursMap", projectHoursMap);
-            model.addAttribute("daysInMonth", days);
-            model.addAttribute("totalePerDay", totalePerDay);
-            model.addAttribute("totalHours", totalHours);
+            model.addAttribute("days", days);
+            model.addAttribute("totalePerDay", totalPerDay);
             return "report";
 
         }
+        model.addAttribute("error", "Researcher not found.");
         return "_error";
     }
 
     @RequestMapping("/generate-report-project")
     public String projectReportPage(
-            @RequestParam(name = "rid", required = true) Long rid,
-            @RequestParam(name = "pid", required = true) Long pid,
-            @RequestParam(name = "month", required = true) int month,
-            @RequestParam(name = "year", required = true) int year,
+            @RequestParam(name = "rid") Long rid,
+            @RequestParam(name = "pid") Long pid,
+            @RequestParam(name = "month") int month,
+            @RequestParam(name = "year") int year,
             Model model
     ){
         model.addAttribute("month",month);
         model.addAttribute("year",year);
-        model.addAttribute("project",projectRepository.findById(pid).get());
-        model.addAttribute("researcher",repository.findById(rid).get());
+        Optional<Researcher> researcher = researcherRepository.findById(rid);
+        Optional<Project> project = projectRepository.findById(pid);
+        if (researcher.isEmpty() || project.isEmpty()) {
+            model.addAttribute("error", "Project or researcher not found.");
+            return "_error";
+        }
+        model.addAttribute("project", project.get());
+        model.addAttribute("researcher", researcher.get());
 
-        YearMonth yearMonth = YearMonth.of(year, month);
-        int daysInMonth = yearMonth.lengthOfMonth();
+        int daysInMonth = getDaysInMonth(year, month);
+
+        // declarations of arrays :
         List<Integer> days = new ArrayList<>();
         List<Integer> hoursWorkedOnProject = new ArrayList<>();
         List<Integer> hoursWorkedOnProjectSameAgency = new ArrayList<>();
@@ -234,30 +279,31 @@ public class AppController {
             hoursWorkedOnOther.add(0);
             totalWorkedDay.add(0);
         }
+
         // last element will contain the totals :
         hoursWorkedOnOther.add(0);
         hoursWorkedOnProjectSameAgency.add(0);
         hoursWorkedOnProject.add(0);
         totalWorkedDay.add(0);
 
-        for (Hours hour : repository.findById(rid).get().getHours()) {
-            if (!hour.isApproved()){
+        for (Hours hour : researcher.get().getHours()) {
+            if (!hour.isApproved()|| researcher.get().isDayOff(hour.getDate())){
                 continue;
             }
-            if(hour.getProject().getId() == pid){
-                hoursWorkedOnProject.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProject.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
-                hoursWorkedOnProject.set(daysInMonth,hoursWorkedOnProject.get(daysInMonth)+hour.getHourWorked());
-            } else if(hour.getProject().getFundingAgency().equals(projectRepository.findById(pid).get().getFundingAgency())){
-                hoursWorkedOnProjectSameAgency.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProjectSameAgency.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
-                hoursWorkedOnProjectSameAgency.set(daysInMonth,hoursWorkedOnProjectSameAgency.get(daysInMonth)+hour.getHourWorked());
+            if(hour.getProject().getId().equals(pid)){
+                hoursWorkedOnProject.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProject.get(hour.getDate().getDayOfMonth()-1)+hour.getHoursWorked());
+                hoursWorkedOnProject.set(daysInMonth,hoursWorkedOnProject.get(daysInMonth)+hour.getHoursWorked());
+            } else if(hour.getProject().getFundingAgency().equals(project.get().getFundingAgency())){
+                hoursWorkedOnProjectSameAgency.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProjectSameAgency.get(hour.getDate().getDayOfMonth()-1)+hour.getHoursWorked());
+                hoursWorkedOnProjectSameAgency.set(daysInMonth,hoursWorkedOnProjectSameAgency.get(daysInMonth)+hour.getHoursWorked());
             } else {
-                hoursWorkedOnOther.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnOther.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
-                hoursWorkedOnOther.set(daysInMonth,hoursWorkedOnOther.get(daysInMonth)+hour.getHourWorked());
+                hoursWorkedOnOther.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnOther.get(hour.getDate().getDayOfMonth()-1)+hour.getHoursWorked());
+                hoursWorkedOnOther.set(daysInMonth,hoursWorkedOnOther.get(daysInMonth)+hour.getHoursWorked());
             }
-            totalWorkedDay.set(hour.getDate().getDayOfMonth()-1, totalWorkedDay.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
-            totalWorkedDay.set(daysInMonth, totalWorkedDay.get(daysInMonth)+hour.getHourWorked());
+            totalWorkedDay.set(hour.getDate().getDayOfMonth()-1, totalWorkedDay.get(hour.getDate().getDayOfMonth()-1)+hour.getHoursWorked());
+            totalWorkedDay.set(daysInMonth, totalWorkedDay.get(daysInMonth)+hour.getHoursWorked());
         }
-        for (LocalDate date : repository.findById(rid).get().getDaysOff()){
+        for (LocalDate date : researcher.get().getDaysOff()){
             if (date.getYear()==year && date.getMonthValue()==month){
                 hoursWorkedOnProject.set(date.getDayOfMonth()-1, -1);
                 hoursWorkedOnProjectSameAgency.set(date.getDayOfMonth()-1, -1);
@@ -280,10 +326,15 @@ public class AppController {
             @RequestParam(name = "day") LocalDate date,
             Model model
     ){
-        Researcher r = repository.findById(id).get();
-        r.addDaysOff(date);
-        repository.save(r);
-        model.addAttribute("researcher", r);
-        return "/researcher";
+        Optional<Researcher> result = researcherRepository.findById(id);
+        if(result.isPresent()){
+            result.get().addDaysOff(date);
+            researcherRepository.save(result.get());
+            model.addAttribute("researcher", result.get());
+            return "/researcher";
+        } else {
+            model.addAttribute("error", "Researcher not found.");
+            return "_error";
+        }
     }
 }

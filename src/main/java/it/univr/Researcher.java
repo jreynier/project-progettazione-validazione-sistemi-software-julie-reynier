@@ -15,22 +15,14 @@ public class Researcher {
     private String firstName;
     private String email;
     private String password;
+    private String fiscalCode;
     @ManyToMany(mappedBy = "researchers")
     private List<Project> projects = new ArrayList<>();
     @OneToMany(mappedBy = "projectInvestigator")
     private List<Project> projectsAsPI = new ArrayList<>();
     @OneToMany(mappedBy = "researcher")
     private List<Hours> hours = new ArrayList<>();
-    private List<LocalDate> daysOff = new ArrayList<>();
-
-
-    public Researcher(Long id, String lastName, String firstName, String email, String password) {
-        this.id = id;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.email = email;
-        this.password = password;
-    }
+    private final List<LocalDate> daysOff = new ArrayList<>();
 
     public Researcher() {
 
@@ -71,15 +63,26 @@ public class Researcher {
         this.password = password;
     }
 
+    public String getFiscalCode() {
+        return fiscalCode;
+    }
+
+    public void setFiscalCode(String fiscalCode) {
+        this.fiscalCode = fiscalCode;
+    }
+
     public List<Project> getProjects() {
         return projects;
     }
+
     public void addProject(Project project) {
         projects.add(project);
     }
+
     public List<Project> getProjectsAsPI() {
         return projectsAsPI;
     }
+
     public void addProjectsAsPI(Project projectAsPI) {
         projectsAsPI.add(projectAsPI);
     }

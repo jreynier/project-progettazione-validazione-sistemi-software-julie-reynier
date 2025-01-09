@@ -11,13 +11,14 @@ public class Project {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private String name;
+    private String fundingAgency;
+    private String projectCode;
     @ManyToMany
     private List<Researcher> researchers = new ArrayList<>(); // Researchers working on this project
     @ManyToOne
     private Researcher projectInvestigator;
     @OneToMany(mappedBy = "project")
     private List<Hours> hours = new ArrayList<>();
-    private String fundingAgency;
 
 
 
@@ -41,12 +42,24 @@ public class Project {
         this.name = name;
     }
 
-    public List<Researcher> getResearchers() {
-        return researchers;
+    public String getFundingAgency() {
+        return fundingAgency;
     }
 
-    public void setResearchers(List<Researcher> researchers) {
-        this.researchers = researchers;
+    public void setFundingAgency(String fundingAgency) {
+        this.fundingAgency = fundingAgency;
+    }
+
+    public String getProjectCode() {
+        return projectCode;
+    }
+
+    public void setProjectCode(String projectCode) {
+        this.projectCode = projectCode;
+    }
+
+    public List<Researcher> getResearchers() {
+        return researchers;
     }
 
     public void addResearcher(Researcher researcher) {
@@ -67,13 +80,5 @@ public class Project {
 
     public void addHours(Hours hours) {
         this.hours.add(hours);
-    }
-
-    public String getFundingAgency() {
-        return fundingAgency;
-    }
-
-    public void setFundingAgency(String fundingAgency) {
-        this.fundingAgency = fundingAgency;
     }
 }

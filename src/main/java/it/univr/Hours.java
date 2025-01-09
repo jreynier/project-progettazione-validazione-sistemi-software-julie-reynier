@@ -9,15 +9,15 @@ public class Hours {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
-    private int hourWorked;
+    private int hoursWorked;
     private LocalDate date;
+    private boolean approved;
+
     @ManyToOne
     private Researcher researcher;
     @ManyToOne
     private Project project;
-
-    private boolean approved;
-
+    
     public Hours() {
 
     }
@@ -30,12 +30,12 @@ public class Hours {
         this.id = id;
     }
 
-    public int getHourWorked() {
-        return hourWorked;
+    public int getHoursWorked() {
+        return hoursWorked;
     }
 
-    public void setHourWorked(int hoursWorked) {
-        this.hourWorked = hoursWorked;
+    public void setHoursWorked(int hoursWorked) {
+        this.hoursWorked = hoursWorked;
     }
 
     public LocalDate getDate() {
@@ -44,6 +44,14 @@ public class Hours {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 
     public Researcher getResearcher() {
@@ -60,13 +68,5 @@ public class Hours {
 
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    public boolean isApproved() {
-        return approved;
-    }
-
-    public void setApproved(boolean approved) {
-        this.approved = approved;
     }
 }

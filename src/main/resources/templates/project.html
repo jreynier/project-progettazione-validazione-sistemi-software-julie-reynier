@@ -10,11 +10,10 @@
 <ul>
 <li th:each="entry: ${hoursByResearcher}">
     <span th:text="${entry.key.firstName}+' '+ ${entry.key.lastName}"> John Smith</span>
-    Generate report for
     <form action="/generate-report-project" >
         <input type="hidden" name="pid" value="10" th:value="${project.id}">
         <input type="hidden" name="rid" value="10" th:value="${entry.key.id}">
-        month : <input type="number" min="1" max="12" name="month">
+        Generate report for month : <input type="number" min="1" max="12" name="month">
         year :  <input type="number" min="2020" max="2025" name="year">
         <input type="submit" value="Generate Report"/>
     </form>
@@ -22,12 +21,11 @@
     <ul>
         <li th:each="hour : ${entry.value}">
             <span th:text="${hour.date}"></span> :
-            <span th:text="${hour.hourWorked}"></span> hours
+            <span th:text="${hour.hoursWorked}"></span> hours
             <a href="approve?id=10" th:href="@{approve(id=${hour.id})}">Approve</a>
             <a href="reject?id=10" th:href="@{reject(id=${hour.id})}">Reject</a>
-            <!-- If no unapproved hours, display a message -->
         </li>
-        <span th:if="${#lists.isEmpty(entry.value)}">No unapproved hours.</span>
+        <span th:if="${entry.value.isEmpty()}">No unapproved hours.</span>
 
     </ul>
 </li>

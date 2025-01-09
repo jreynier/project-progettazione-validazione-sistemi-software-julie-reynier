@@ -8,11 +8,15 @@
 <h1><span  th:text="${month}+ '/' + ${year}"></span> </h1>
 <h2>Project</h2>
 Project Name : <span th:text="${project.name}"></span><br>
+Project Code : <span th:text="${project.projectCode}"></span><br>
 Funding Agency : <span th:text="${project.fundingAgency}"></span><br>
 
 <h2>Researcher</h2>
 Name : <span th:text="${researcher.firstName}"></span><br>
 Last Name : <span th:text="${researcher.lastName}"></span><br>
+Email : <span th:text="${researcher.email}"></span><br>
+Fiscal Code : <span th:text="${researcher.fiscalCode}"></span><br>
+
 
 <table border="1">
   <thead>
@@ -23,37 +27,28 @@ Last Name : <span th:text="${researcher.lastName}"></span><br>
   </tr>
   </thead>
   <tbody>
-  <!-- Loop through the hoursWorkedOnProject list -->
   <tr>
     <td th:text="${project.name}">Project Name</td>
-    <!-- Loop through each day and display the corresponding hours worked -->
-    <td th:each="day : ${days}" th:text="${hoursWorkedOnProject[day-1]== -1 ? 'v': hoursWorkedOnProject[day-1]}">0</td>
-    <td th:text="${hoursWorkedOnProject[daysInMonth]== -1 ? 'v': hoursWorkedOnProject[daysInMonth]}">0</td>
-
+    <td th:each="val : ${hoursWorkedOnProject}" th:text="${val}== -1 ? 'X': ${val}">0</td>
   </tr>
 
-  <!-- Loop through the hoursWorkedOnProjectSameAgency list -->
   <tr>
     <td>Same Agency Projects</td>
-    <td th:each="day : ${days}" th:text="${hoursWorkedOnProjectSameAgency[day-1]== -1 ? 'v': hoursWorkedOnProjectSameAgency[day-1]}">0</td>
-    <td th:text="${hoursWorkedOnProjectSameAgency[daysInMonth]== -1 ? 'v': hoursWorkedOnProjectSameAgency[daysInMonth]}">0</td>
-
+    <td th:each="val : ${hoursWorkedOnProjectSameAgency}" th:text="${val}== -1 ? 'X': ${val}">0</td>
   </tr>
 
   <!-- Loop through the hoursWorkedOnOther list -->
   <tr>
     <td>Other Projects</td>
-    <td th:each="day : ${days}" th:text="${hoursWorkedOnOther[day-1]== -1 ? 'v': hoursWorkedOnOther[day-1]}">0</td>
-    <td th:text="${hoursWorkedOnOther[daysInMonth]== -1 ? 'v': hoursWorkedOnOther[daysInMonth]}">0</td>
-
+    <td th:each="val : ${hoursWorkedOnOther}" th:text="${val}== -1 ? 'X': ${val}">0</td>
   </tr>
   <tr>
     <td>Total</td>
-    <td th:each="day : ${days}" th:text="${totalPerDay[day-1]== -1 ? 'v': totalPerDay[day-1]}">0</td>
-    <td th:text="${totalPerDay[daysInMonth]== -1 ? 'v': totalPerDay[daysInMonth]}">0</td>
+    <td th:each="val : ${totalPerDay}" th:text="${val}== -1 ? 'X': ${val}">0</td>
   </tr>
   </tbody>
 </table>
+X : day off <br>
 
 <a href="project?id=10" th:href="@{project(id=${project.id})}">Back</a>
 

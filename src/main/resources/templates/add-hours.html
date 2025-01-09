@@ -7,14 +7,14 @@
 <body>
 <h1>Add hours to the project : <span th:text="${project.name}" ></span></h1>
 
-<form action="requesthours" method="post">
+<form action="request-hours" method="post">
     <input type="hidden" name="rid" value="10" th:value="${researcher.id}"> <br>
     <input type="hidden" name="pid" value="10" th:value="${project.id}"> <br>
     Day:<input type="date" name="day"><br>
     Hours:<input type="number" min="1" max="10" name="hours"><br>
     <input type="submit" />
 </form>
-
+<br>
 <a href="researcher?id=10" th:href="@{researcher(id=${researcher.id})}">Back</a>
 </body>
 </html>
