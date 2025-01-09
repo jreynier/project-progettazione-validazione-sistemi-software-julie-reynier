@@ -2,6 +2,7 @@ package it.univr;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,8 @@ public class Researcher {
     private List<Project> projectsAsPI = new ArrayList<>();
     @OneToMany(mappedBy = "researcher")
     private List<Hours> hours = new ArrayList<>();
+    private List<LocalDate> daysOff = new ArrayList<>();
+
 
     public Researcher(Long id, String lastName, String firstName, String email, String password) {
         this.id = id;
@@ -87,5 +90,17 @@ public class Researcher {
 
     public void addHours(Hours hours) {
         this.hours.add(hours);
+    }
+
+    public boolean isDayOff(LocalDate date) {
+        return daysOff.contains(date);
+    }
+
+    public List<LocalDate> getDaysOff() {
+        return daysOff;
+    }
+
+    public void addDaysOff(LocalDate daysOff) {
+        this.daysOff.add(daysOff);
     }
 }

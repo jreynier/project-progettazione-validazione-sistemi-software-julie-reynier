@@ -17,6 +17,9 @@ public class Project {
     private Researcher projectInvestigator;
     @OneToMany(mappedBy = "project")
     private List<Hours> hours = new ArrayList<>();
+    private String fundingAgency;
+
+
 
     public Project() {
 
@@ -66,4 +69,11 @@ public class Project {
         this.hours.add(hours);
     }
 
+    public String getFundingAgency() {
+        return fundingAgency;
+    }
+
+    public void setFundingAgency(String fundingAgency) {
+        this.fundingAgency = fundingAgency;
+    }
 }

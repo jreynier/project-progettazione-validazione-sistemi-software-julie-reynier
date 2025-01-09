@@ -191,9 +191,9 @@ public class AppController {
                     }
                     projectHoursMap.put(project, listHours);
                 }
-                projectHoursMap.get(project).set(date.getDayOfMonth()+1,projectHoursMap.get(project).get(date.getDayOfMonth()+1)+hour.getHourWorked());
+                projectHoursMap.get(project).set(date.getDayOfMonth()-1,projectHoursMap.get(project).get(date.getDayOfMonth()-1)+hour.getHourWorked());
                 projectHoursMap.get(project).set(daysInMonth,projectHoursMap.get(project).get(daysInMonth)+hour.getHourWorked());
-                totalePerDay.set(date.getDayOfMonth()+1,totalePerDay.get(date.getDayOfMonth()+1)+hour.getHourWorked());
+                totalePerDay.set(date.getDayOfMonth()-1,totalePerDay.get(date.getDayOfMonth()-1)+hour.getHourWorked());
                 totalHours += hour.getHourWorked();
             }
 
@@ -207,4 +207,83 @@ public class AppController {
         return "_error";
     }
 
+    @RequestMapping("/generate-report-project")
+    public String projectReportPage(
+            @RequestParam(name = "rid", required = true) Long rid,
+            @RequestParam(name = "pid", required = true) Long pid,
+            @RequestParam(name = "month", required = true) int month,
+            @RequestParam(name = "year", required = true) int year,
+            Model model
+    ){
+        model.addAttribute("month",month);
+        model.addAttribute("year",year);
+        model.addAttribute("project",projectRepository.findById(pid).get());
+        model.addAttribute("researcher",repository.findById(rid).get());
+
+        YearMonth yearMonth = YearMonth.of(year, month);
+        int daysInMonth = yearMonth.lengthOfMonth();
+        List<Integer> days = new ArrayList<>();
+        List<Integer> hoursWorkedOnProject = new ArrayList<>();
+        List<Integer> hoursWorkedOnProjectSameAgency = new ArrayList<>();
+        List<Integer> hoursWorkedOnOther= new ArrayList<>();
+        List<Integer> totalWorkedDay = new ArrayList<>();
+        for (int i = 0; i < daysInMonth; i++) {
+            days.add(i+1);
+            hoursWorkedOnProject.add(0);
+            hoursWorkedOnProjectSameAgency.add(0);
+            hoursWorkedOnOther.add(0);
+            totalWorkedDay.add(0);
+        }
+        // last element will contain the totals :
+        hoursWorkedOnOther.add(0);
+        hoursWorkedOnProjectSameAgency.add(0);
+        hoursWorkedOnProject.add(0);
+        totalWorkedDay.add(0);
+
+        for (Hours hour : repository.findById(rid).get().getHours()) {
+            if (!hour.isApproved()){
+                continue;
+            }
+            if(hour.getProject().getId() == pid){
+                hoursWorkedOnProject.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProject.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
+                hoursWorkedOnProject.set(daysInMonth,hoursWorkedOnProject.get(daysInMonth)+hour.getHourWorked());
+            } else if(hour.getProject().getFundingAgency().equals(projectRepository.findById(pid).get().getFundingAgency())){
+                hoursWorkedOnProjectSameAgency.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnProjectSameAgency.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
+                hoursWorkedOnProjectSameAgency.set(daysInMonth,hoursWorkedOnProjectSameAgency.get(daysInMonth)+hour.getHourWorked());
+            } else {
+                hoursWorkedOnOther.set(hour.getDate().getDayOfMonth()-1,hoursWorkedOnOther.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
+                hoursWorkedOnOther.set(daysInMonth,hoursWorkedOnOther.get(daysInMonth)+hour.getHourWorked());
+            }
+            totalWorkedDay.set(hour.getDate().getDayOfMonth()-1, totalWorkedDay.get(hour.getDate().getDayOfMonth()-1)+hour.getHourWorked());
+            totalWorkedDay.set(daysInMonth, totalWorkedDay.get(daysInMonth)+hour.getHourWorked());
+        }
+        for (LocalDate date : repository.findById(rid).get().getDaysOff()){
+            if (date.getYear()==year && date.getMonthValue()==month){
+                hoursWorkedOnProject.set(date.getDayOfMonth()-1, -1);
+                hoursWorkedOnProjectSameAgency.set(date.getDayOfMonth()-1, -1);
+                hoursWorkedOnOther.set(date.getDayOfMonth()-1, -1);
+                totalWorkedDay.set(date.getDayOfMonth()-1, -1);
+            }
+        }
+        model.addAttribute("hoursWorkedOnProject", hoursWorkedOnProject);
+        model.addAttribute("hoursWorkedOnOther", hoursWorkedOnOther);
+        model.addAttribute("hoursWorkedOnProjectSameAgency", hoursWorkedOnProjectSameAgency);
+        model.addAttribute("days", days);
+        model.addAttribute("totalPerDay", totalWorkedDay);
+        model.addAttribute("daysInMonth", daysInMonth);
+        return "report-project";
+    }
+
+    @RequestMapping("request-day-off")
+    public String dayOff(
+            @RequestParam(name = "id") Long id,
+            @RequestParam(name = "day") LocalDate date,
+            Model model
+    ){
+        Researcher r = repository.findById(id).get();
+        r.addDaysOff(date);
+        repository.save(r);
+        model.addAttribute("researcher", r);
+        return "/researcher";
+    }
 }

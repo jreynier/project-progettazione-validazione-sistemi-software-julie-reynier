@@ -20,13 +20,21 @@
         <span th:text="${project.name}"></span>
         <a th:href="@{'/addhours?rid=' + ${researcher.id} + '&pid=' + ${project.id}}">Add hours</a></ul>
 
-Generate report for
+Generate your report for :
 <form action="/generate" >
     <input type="hidden" name="id" value="10" th:value="${researcher.id}"> <br>
     month : <input type="number" min="1" max="12" name="month">
     year :  <input type="number" min="2020" max="2025" name="year"><br>
-    <input type="submit" value="generate"/>
+    <input type="submit" value="Generate Report"/>
 </form>
+<br>
+Ask a day off :
+<form action="/request-day-off" >
+    <input type="hidden" name="id" value="10" th:value="${researcher.id}"> <br>
+    Day:<input type="date" name="day"><br>
+    <input type="submit" value="Submit Request"/>
+</form>
+<br>
 <a href="/" >Log out</a>
 
 </body>

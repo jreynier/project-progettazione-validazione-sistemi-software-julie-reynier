@@ -9,7 +9,16 @@
 
 <ul>
 <li th:each="entry: ${hoursByResearcher}">
-    <span th:text="${entry.key.firstName}+' '+ ${entry.key.lastName}"> John Smith <br></span>
+    <span th:text="${entry.key.firstName}+' '+ ${entry.key.lastName}"> John Smith</span>
+    Generate report for
+    <form action="/generate-report-project" >
+        <input type="hidden" name="pid" value="10" th:value="${project.id}">
+        <input type="hidden" name="rid" value="10" th:value="${entry.key.id}">
+        month : <input type="number" min="1" max="12" name="month">
+        year :  <input type="number" min="2020" max="2025" name="year">
+        <input type="submit" value="Generate Report"/>
+    </form>
+         <br>
     <ul>
         <li th:each="hour : ${entry.value}">
             <span th:text="${hour.date}"></span> :
