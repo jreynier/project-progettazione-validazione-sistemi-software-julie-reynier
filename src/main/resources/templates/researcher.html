@@ -11,7 +11,7 @@
 
 <h2 >Your Projects as PI : </h2>
 <ul id="projectsAsPIList">
-    <li th:each="project : ${researcher.projectsAsPI}" id="projectAsPI-${project.id}">
+    <li th:each="project : ${researcher.projectsAsPI}" >
         <span th:text="${project.name}"></span>
         <a href="project?id=10" th:href="@{project(id=${project.id})}">Manage Project</a>
     </li>
@@ -19,22 +19,24 @@
 
 <h2>Projects You're Working On : </h2>
 <ul id="projectsList">
-    <li th:each="project : ${researcher.projects}" id="projectsList-${project.id}">
+    <li th:each="project : ${researcher.projects}" >
         <span th:text="${project.name}"></span>
-        <a th:href="@{'/add-hours?rid=' + ${researcher.id} + '&pid=' + ${project.id}}">Add hours</a></ul>
+        <a th:href="@{'/add-hours?rid=' + ${researcher.id} + '&pid=' + ${project.id}}">Add hours</a>
+    </li>
+</ul>
 
 <form action="/generate-report" >
     <input type="hidden" name="id" value="10" th:value="${researcher.id}"> <br>
     Generate your report for month : <input type="number" min="1" max="12" name="month">
     year :  <input type="number" min="2020" max="2025" name="year">
-    <input type="submit" value="Generate Report"/>
+    <input id="generateButton" type="submit" value="Generate Report"/>
 </form>
 <br>
 
 <form action="/request-day-off" >
     <input type="hidden" name="id" value="10" th:value="${researcher.id}"> <br>
     Ask a day off : Day : <input type="date" name="day">
-    <input type="submit" value="Submit Request"/>
+    <input id="askDayOffButton" type="submit" value="Submit Request"/>
 </form>
 <br>
 

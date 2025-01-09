@@ -20,7 +20,7 @@
          <br>
     <ul>
         <li th:each="hour : ${entry.value}">
-            <span th:text="${hour.date}"></span> :
+            <span th:text="${hour.date}"></span>
             <span th:text="${hour.hoursWorked}"></span> hours
             <a href="approve?id=10" th:href="@{approve(id=${hour.id})}">Approve</a>
             <a href="reject?id=10" th:href="@{reject(id=${hour.id})}">Reject</a>
