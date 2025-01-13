@@ -86,7 +86,7 @@ public class SystemTest extends BaseTest {
 
     @Test
     public void testScenarioRejectHour() {
-        addHours(LocalDate.of(2025, 1, 15), 3, "researcher2@univr.it", "234567", "NeuroPuls");
+        addHours(LocalDate.of(2025, 1, 6), 3, "researcher2@univr.it", "234567", "NeuroPuls");
         driver.get("http://localhost:8080/");
         LoginPage loginPage = new LoginPage(driver);
         assertEquals("UniPro : Login", loginPage.title());
@@ -97,13 +97,13 @@ public class SystemTest extends BaseTest {
         ResearcherPage researcherPage = (ResearcherPage) page;
         ProjectPage projectPage = researcherPage.clickManageProject("NeuroPuls");
         assertEquals("Manage project : NeuroPuls", projectPage.title());
-        projectPage.rejectHour(LocalDate.of(2025,1,15),3, "Mario Rossi");
+        projectPage.rejectHour(LocalDate.of(2025,1,6),3, "Mario Rossi");
         ReportProjectPage reportProjectPage = projectPage.goToReport("Mario Rossi", 1, 2025);
         assertEquals("1/2025", reportProjectPage.title());
         assertEquals("0",reportProjectPage.getElementForProjectAndDay(0, 15));
         boolean found = false;
         for (Hours hours : hoursRepository.findByResearcher(researcherRepository.findByEmail("researcher2@univr.it"))){
-            if (hours.getDate().equals(LocalDate.of(2025,1,15)) && hours.getHoursWorked() == 3){
+            if (hours.getDate().equals(LocalDate.of(2025,1,6)) && hours.getHoursWorked() == 3){
                 assertFalse(hours.isApproved());
                 found = true;
             }
