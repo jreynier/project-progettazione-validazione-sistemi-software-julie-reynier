@@ -36,32 +36,16 @@ public class Project {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getFundingAgency() {
         return fundingAgency;
     }
 
-    public void setFundingAgency(String fundingAgency) {
-        this.fundingAgency = fundingAgency;
-    }
-
     public String getProjectCode() {
         return projectCode;
-    }
-
-    public void setProjectCode(String projectCode) {
-        this.projectCode = projectCode;
     }
 
     public List<Researcher> getResearchers() {

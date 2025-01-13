@@ -34,10 +34,6 @@ public class Hours {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public int getHoursWorked() {
         return hoursWorked;
     }
