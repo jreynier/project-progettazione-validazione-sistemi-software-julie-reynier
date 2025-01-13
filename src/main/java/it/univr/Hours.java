@@ -22,6 +22,14 @@ public class Hours {
 
     }
 
+    public Hours(int hoursWorked, LocalDate date, boolean approved, Researcher researcher, Project project) {
+        this.hoursWorked = hoursWorked;
+        this.date = date;
+        this.approved = approved;
+        this.researcher = researcher;
+        this.project = project;
+    }
+
     public Long getId() {
         return id;
     }

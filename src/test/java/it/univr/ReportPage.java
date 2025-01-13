@@ -12,9 +12,6 @@ public class ReportPage  extends PageObject{
         super(driver);
     }
 
-    @FindBy(tagName = "h1")
-    private WebElement title;
-
     @FindBy(xpath = "//table/thead/tr/th")
     private List<WebElement> headers;
 
@@ -23,10 +20,6 @@ public class ReportPage  extends PageObject{
 
     @FindBy(linkText = "Back")
     WebElement backLink;
-
-    public String title(){
-        return title.getText();
-    }
 
     public int numberOfColumns(){
         return headers.size();

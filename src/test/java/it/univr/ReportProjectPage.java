@@ -11,8 +11,6 @@ public class ReportProjectPage  extends PageObject{
     public ReportProjectPage(WebDriver driver) {
         super(driver);
     }
-    @FindBy(tagName = "h1")
-    private WebElement title;
 
     @FindBy(xpath = "//table/thead/tr/th")
     private List<WebElement> headers;
@@ -22,10 +20,6 @@ public class ReportProjectPage  extends PageObject{
 
     @FindBy(linkText = "Back")
     WebElement backLink;
-
-    public String title(){
-        return title.getText();
-    }
 
     public int numberOfColumns(){
         return headers.size();
@@ -44,6 +38,7 @@ public class ReportProjectPage  extends PageObject{
             throw new IllegalArgumentException("Need a valid day");
         }
         WebElement row = rows.get(project);
+        String test = row.getText();
         List<WebElement> cells = row.findElements(By.xpath("./td"));
         return cells.get(day).getText();
     }

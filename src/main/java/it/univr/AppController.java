@@ -133,13 +133,13 @@ public class AppController {
             @RequestParam(name="pid") Long pid, Model model) {
         Optional<Project> project = projectRepository.findById(pid);
         Optional<Researcher> researcher = researcherRepository.findById(rid);
-        if (project.isPresent() && researcher.isPresent()) {
+        if (project.isPresent() && researcher.isPresent() && researcher.get().getProjects().contains(project.get())) {
             model.addAttribute("project", project.get());
             model.addAttribute("researcher", researcher.get());
             return "add-hours";
         }
         else {
-            model.addAttribute("error", "Project or researcher not found.");
+            model.addAttribute("error", "Project or researcher not found or researcher does not work on this project.");
             return "_error";
         }
     }
@@ -153,8 +153,8 @@ public class AppController {
             Model model) {
         Optional<Project> project = projectRepository.findById(pid);
         Optional<Researcher> researcher = researcherRepository.findById(rid);
-        if (project.isEmpty() || researcher.isEmpty()) {
-            model.addAttribute("error", "Project or researcher not found.");
+        if (project.isEmpty() || researcher.isEmpty() || !researcher.get().getProjects().contains(project.get())) {
+            model.addAttribute("error", "Project or researcher not found or researcher does not work on this project.");
             return "_error";
         }
         // Create the new hour :
@@ -224,7 +224,7 @@ public class AppController {
                     totalPerDay.set(daysInMonth, totalPerDay.get(daysInMonth)+hour.getHoursWorked());                                   //grand total
                     for (LocalDate dayOff : researcher.getDaysOff()){
                         if (dayOff.getYear()==year && dayOff.getMonthValue()==month){
-                            projectHoursMap.get(project).set(date.getDayOfMonth()-1, -1);
+                            projectHoursMap.get(project).set(dayOff.getDayOfMonth()-1, -1);
                         }
                     }
                 }
@@ -257,8 +257,8 @@ public class AppController {
         model.addAttribute("year",year);
         Optional<Researcher> researcher = researcherRepository.findById(rid);
         Optional<Project> project = projectRepository.findById(pid);
-        if (researcher.isEmpty() || project.isEmpty()) {
-            model.addAttribute("error", "Project or researcher not found.");
+        if (researcher.isEmpty() || project.isEmpty() || !researcher.get().getProjects().contains(project.get())) {
+            model.addAttribute("error", "Project or researcher not found or reseacher does not work on this project.");
             return "_error";
         }
         model.addAttribute("project", project.get());
@@ -287,7 +287,7 @@ public class AppController {
         totalWorkedDay.add(0);
 
         for (Hours hour : researcher.get().getHours()) {
-            if (!hour.isApproved()|| researcher.get().isDayOff(hour.getDate())){
+            if (!hour.isApproved()|| researcher.get().isDayOff(hour.getDate()) || hour.getDate().getMonthValue() != month || hour.getDate().getYear() != year){
                 continue;
             }
             if(hour.getProject().getId().equals(pid)){

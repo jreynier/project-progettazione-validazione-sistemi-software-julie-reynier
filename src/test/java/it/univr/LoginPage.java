@@ -9,9 +9,6 @@ import org.openqa.selenium.support.FindBy;
 
 
 public class LoginPage  extends PageObject{
-    @FindBy(tagName = "h1")
-    private WebElement title;
-
     @FindBy(name="email")
     private WebElement email;
 
@@ -25,20 +22,17 @@ public class LoginPage  extends PageObject{
         super(driver);
     }
 
-    public String title(){
-        return title.getText();
-    }
-
-    public void enterCredentials(String email, String password){
+    public PageObject login(String email, String password) {
         this.email.clear();
         this.email.sendKeys(email);
         this.password.clear();
         this.password.sendKeys(password);
-    }
-
-    public ResearcherPage submit(){
         this.loginButton.click();
-        return new ResearcherPage(driver);
+        if (driver.getCurrentUrl().contains("researcher")) {
+            return new ResearcherPage(driver);
+        }
+        return this;
+
     }
 
 }

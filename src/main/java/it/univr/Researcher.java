@@ -27,6 +27,14 @@ public class Researcher {
     public Researcher() {
 
     }
+
+    public Researcher(String firstName, String lastName, String email, String password, String fiscalCode) {
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.email = email;
+        this.password = password;
+        this.fiscalCode = fiscalCode;
+    }
     public Long getId() {
         return id;
     }
@@ -85,6 +93,7 @@ public class Researcher {
 
     public void addProjectsAsPI(Project projectAsPI) {
         projectsAsPI.add(projectAsPI);
+        projects.add(projectAsPI); // the pi works on the project
     }
 
     public List<Hours> getHours() {

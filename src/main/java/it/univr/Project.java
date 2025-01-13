@@ -26,6 +26,12 @@ public class Project {
 
     }
 
+    public Project(String name, String fundingAgency, String projectCode) {
+        this.name = name;
+        this.fundingAgency = fundingAgency;
+        this.projectCode = projectCode;
+    }
+
     public Long getId() {
         return id;
     }
@@ -72,6 +78,7 @@ public class Project {
 
     public void setProjectInvestigator(Researcher projectInvestigator) {
         this.projectInvestigator = projectInvestigator;
+        addResearcher(projectInvestigator);     // the PI works on the project
     }
 
     public List<Hours> getHours() {

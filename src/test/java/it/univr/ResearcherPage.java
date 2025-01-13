@@ -16,9 +16,6 @@ public class ResearcherPage extends PageObject {
         super(driver);
     }
 
-    @FindBy(tagName = "h1")
-    private WebElement title;
-
     @FindBy(id="projectsAsPIList")
     WebElement projectsAsPIList;
 
@@ -34,7 +31,7 @@ public class ResearcherPage extends PageObject {
     @FindBy(id="generateButton")
     private WebElement generateButton;
 
-    @FindBy(name="day")
+    @FindBy(xpath = "//form[@action='/request-day-off']//input[@name='day']")
     private WebElement day;
 
     @FindBy(id="askDayOffButton")
@@ -42,10 +39,6 @@ public class ResearcherPage extends PageObject {
 
     @FindBy(linkText = "Log out")
     WebElement logoutLink;
-
-    public String title(){
-        return title.getText();
-    }
 
     public WebElement projectToFind(String name, WebElement list){
         List<WebElement> projects = list.findElements(By.tagName("li"));
@@ -62,9 +55,10 @@ public class ResearcherPage extends PageObject {
         return projectToFind(projectName, projectsAsPIList) != null;
     }
 
-    public void clickManageProject(String projectName) {
+    public ProjectPage clickManageProject(String projectName) {
         WebElement manageLink = projectToFind(projectName, projectsAsPIList).findElement(By.tagName("a"));
         manageLink.click();
+        return new ProjectPage(driver);
     }
 
     public int getProjectsAsPIListSize() {
@@ -76,9 +70,10 @@ public class ResearcherPage extends PageObject {
         return projectToFind(projectName, projectsList) != null;
     }
 
-    public void clickAddHours(String projectName) {
+    public AddHoursPage clickAddHours(String projectName) {
         WebElement addHourLink = projectToFind(projectName,projectsList).findElement(By.tagName("a"));
         addHourLink.click();
+        return new AddHoursPage(driver);
     }
 
     public int getProjectsListSize() {

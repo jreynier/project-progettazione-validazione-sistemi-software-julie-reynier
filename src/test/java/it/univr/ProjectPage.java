@@ -13,20 +13,11 @@ public class ProjectPage  extends PageObject{
         super(driver);
     }
 
-    @FindBy(tagName = "h1")
-    private WebElement title;
-
     @FindBy(xpath = "//ul")
     private WebElement researchers;
 
     @FindBy(linkText = "Back")
     WebElement backLink;
-
-
-
-    public String title(){
-        return title.getText();
-    }
 
     public WebElement researcherToFind(String name){
         List<WebElement> elements = researchers.findElements(By.tagName("li"));
@@ -40,7 +31,7 @@ public class ProjectPage  extends PageObject{
     }
 
     public int numberOfResearchers(){
-        return researchers.findElements(By.tagName("li")).size();
+        return researchers.findElements(By.xpath("./li")).size();
     }
 
     public boolean researcherIsFound(String name){
@@ -58,7 +49,7 @@ public class ProjectPage  extends PageObject{
         monthElement.sendKeys(String.valueOf(month));
         yearElement.clear();
         yearElement.sendKeys(String.valueOf(year));
-        researcherToFind(name).findElement(By.tagName("a")).click();
+        researcherToFind(name).findElement(By.xpath(".//input[@type='submit']")).click();
         return new ReportProjectPage(driver);
     }
 
