@@ -1,6 +1,6 @@
 # Report Project Progettazione e Validazione di Sistemi Software
 
-This document specifies the requirements and tests coverage for UniPro. This (component) system allows researchers to submit the hours they worked on a project, apply for days off, and generate reports. 
+This document specifies the requirements and tests coverage for **UniPro**, a system that allows researchers to submit the hours they worked on a project, apply for days off, and generate reports. 
 
 # Requirements
 
@@ -55,15 +55,15 @@ Researcher Jean Martin ask for a day off for January 16, 2025.
 ### 5- Generate a report
 Researcher Mario Rossi generates a report for January 2025. He can see how many hours he spent on each of his projects for every day of the month.
 
-### 5- Generate a project report
+### 6- Generate a project report
 Researcher Jean Martin, Pi of the project NeuroPuls, generates a report for January 2025 for Mario Rossi. He can see how many hours Mario spent on each of the project for every day of the month and also how many hours he spent in total on other projects and other projects lead by the same funding agency.
 
 
 # Test Cases
-Data : we created 3 projects and 3 researchers so that we could test different configuration (reports with same funding agency or no, researcher with projects as PI or no etc).
+Data : we created 3 projects and 3 researchers so that we could test different configuration (projects with the same funding agency or no, researchers with projects as PI or no etc).  
+In total, we have 34 tests.
 ### Unit Tests :
-For every HTML page of the system, we have a java class with several tests. Each tests test a functionality that appears on the page.
-Test Coverage : we achieve an instruction coverage of 99% and a branch coverage of 88%
+For every HTML page of the system, we have a java class with several tests. Each test tests a functionality that appears on the page. We have 28 unit tests.
+Test Coverage : we achieve an instruction coverage of 99% and a branch coverage of 88%. The missing branches being mostly error cases that we did not write a test for, as testing already takes a lot of time.
 ### Acceptance test cases :
-
-We implemented all the scenarios with the corresponding data.
+We wrote 6 tests implementing the different scenarios. Each test starts from the login page so that we test the full scenario usage of the system.
