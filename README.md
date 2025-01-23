@@ -5,11 +5,11 @@ This document specifies the requirements and tests coverage for **UniPro**, a sy
 # Requirements
 
 ## Glossary
-Hours worked : A record of hours worked on a specific project for a day given.  
-Principal Investigator (PI) : The lead researcher responsible for approving hours.  
-Day Off : A day off approved for a researcher. A researcher can not work on a day off (in this component the days off are automatically approved).  
-Report : A document summarizing time tracking data for researchers or projects for a given month.  
-Invalid hours : hours that have been submitted on an already approved day off, on a weekend day or a public holiday.   
+- **Hours worked :** A record of hours worked on a specific project for a day given.  
+- **Principal Investigator (PI) :** The lead researcher responsible for approving hours.  
+- **Day Off :** A day off approved for a researcher. A researcher can not work on a day off (in this component the days off are automatically approved).  
+- **Report :** A document summarizing time tracking data for researchers or projects for a given month.  
+- **Invalid hours :** hours that have been submitted on an already approved day off, on a weekend day or a public holiday.   
 
 ## 0- Log In
 Researchers shall be able to log in the system using their academic email and password.
