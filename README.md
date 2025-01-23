@@ -32,7 +32,7 @@ Researchers shall be able to request for days off. (In this system, they are aut
 
 ## 5- Generate reports for a researcher
 
-Researchers shall be able to generate a report summarizing their daily hours and vacation days for a specific month and year. For each day of the month, they can see how many (approved) hours they worked on each project, or an X if they had a day off. They can also see the total of hours worked for the month for each project the total of hours worked for each day.  
+Researchers shall be able to generate a report summarizing their daily hours and vacation days for a specific month and year. For each day of the month, they can see how many (approved) hours they worked on each project, or an X if they had a day off. They can also see the total of hours worked for the month for each project and the total of hours worked for each day.  
 The hours yet to be approved are not visible.
 
 ## 6- Generate project-specific reports for a researcher
